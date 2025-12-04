@@ -9,8 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFMpegCore" Version="5.4.0" />
-    <PackageReference Include="FFMpegCore.Extensions.Downloader" Version="5.0.0" />
     <PackageReference Include="RazorConsole.Core" Version="0.2.1" />
   </ItemGroup>
 
