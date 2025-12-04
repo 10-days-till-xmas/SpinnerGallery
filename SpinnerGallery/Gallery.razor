@@ -1,0 +1,53 @@
+﻿@using System.Collections.Immutable
+@using System.Reflection
+@using Microsoft.AspNetCore.Components.Web
+@using RazorConsole.Components
+@using Spectre.Console
+@using Spinner = Spectre.Console.Spinner
+
+<Scrollable Items="@_spinners" PageSize="5">
+    <Rows>
+        <SpectreTable Title="Known Spinner Gallery" Border="TableBorder.Rounded" BorderColor="@_tableColor" 
+                      @onfocus="OnFocusTable" @onfocusout="@OnFocusOutTable" @onkeydown="context.KeyDownEventHandler">
+            <SpectreTHead>
+                <SpectreTR>
+                    <SpectreTH Align="Justify.Left">Name</SpectreTH>
+                    <SpectreTH Align="Justify.Center">Spinner</SpectreTH>
+                </SpectreTR>
+            </SpectreTHead>
+            <SpectreTBody>
+                @foreach (var item in context)
+                {
+                    <SpectreTR>
+                        <SpectreTD>
+                            <Markup Content="@item.Name" />
+                        </SpectreTD>
+                        <SpectreTD>
+                            <Spinner SpinnerType="@(item.Spinner)"/>
+                        </SpectreTD>
+                    </SpectreTR>
+                }
+            </SpectreTBody>
+        </SpectreTable>
+        <Markup Content=@($"Item: {context.CurrentOffset + 1} / {context.PagesCount}") />
+    </Rows>
+</Scrollable>
+@code
+{
+    private Color _tableColor = Color.White;
+    private sealed record SpinnerInfo(string Name, Spinner Spinner);
+    private static readonly ImmutableArray<SpinnerInfo> _spinners;
+
+    static Gallery()
+    {
+        _spinners = typeof(Spinner.Known).GetProperties(BindingFlags.Public | BindingFlags.Static)
+                                         .Where(static property => property.PropertyType == typeof(Spinner))
+                                         .Select(static p => new SpinnerInfo(p.Name, (Spinner)p.GetValue(null)!))
+                                         .ToImmutableArray();
+        var max = _spinners.Select(static si => si.Name.Length).Max();
+        _spinners = _spinners.Select(si => si with { Name = si.Name.PadRight(max) }).ToImmutableArray();
+    }
+
+    private void OnFocusTable(FocusEventArgs e) => _tableColor = Color.Aqua;
+    private void OnFocusOutTable(FocusEventArgs e) => _tableColor = Color.White;
+}
